@@ -11,14 +11,16 @@ const translations = {
     title: 'QuickBlessing',
     disclaimer: 'Bu site tamamen eğlence amaçlı tasarlanmıştır.',
     blessMe: 'Kutsanmak İçin Basınız',
-    timeUntilNext: 'Tekrar kutsanmaya:'
+    timeUntilNext: 'Tekrar kutsanmaya:',
+    blessedMessage: '⚔ Kutsandın! ⚔',
   },
   en: {
     title: 'QuickBlessing',
     disclaimer: 'This site is designed purely for entertainment purposes.',
     blessMe: 'Click to Be Blessed',
-    timeUntilNext: 'Next blessing in:'
-  }
+    timeUntilNext: 'Next blessing in:',
+    blessedMessage: '⚔ You are Blessed! ⚔',
+  },
 };
 
 const App: React.FC = () => {
@@ -26,28 +28,26 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('language');
     return (saved as Language) || 'tr';
   });
-  
+
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme');
     return (saved as Theme) || 'light';
   });
-  
+
   const [isBlessed, setIsBlessed] = useState(() => {
     const saved = localStorage.getItem('isBlessed');
     return saved === 'true';
   });
-  
+
   const [timeLeft, setTimeLeft] = useState(() => {
     const savedEndTime = localStorage.getItem('endTime');
-    
     if (savedEndTime) {
       const remaining = Math.floor((parseInt(savedEndTime) - Date.now()) / 1000);
       return remaining > 0 ? remaining : 0;
     }
-    
     return 0;
   });
-  
+
   const [isWaiting, setIsWaiting] = useState(() => {
     const saved = localStorage.getItem('isWaiting');
     const savedEndTime = localStorage.getItem('endTime');
@@ -62,7 +62,6 @@ const App: React.FC = () => {
   const t = translations[language];
   const WAIT_TIME = 600;
 
-  // Ayarları kaydet
   useEffect(() => {
     localStorage.setItem('language', language);
   }, [language]);
@@ -108,14 +107,13 @@ const App: React.FC = () => {
       setIsBlessed(true);
       setIsWaiting(true);
       setTimeLeft(WAIT_TIME);
-      
-      // Bitiş zamanını kaydet
-      const endTime = Date.now() + (WAIT_TIME * 1000);
+
+      const endTime = Date.now() + WAIT_TIME * 1000;
       localStorage.setItem('endTime', endTime.toString());
-      
+
       if (audioRef.current) {
         audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(err => {
+        audioRef.current.play().catch((err) => {
           console.log('Müzik çalınamadı:', err);
         });
       }
@@ -136,9 +134,9 @@ const App: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const bgColor = theme === 'light' 
-    ? 'bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50' 
-    : 'bg-gradient-to-br from-indigo-950 via-purple-950 to-violet-950';
+  const bgColor = theme === 'light'
+      ? 'bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50'
+      : 'bg-gradient-to-br from-indigo-950 via-purple-950 to-violet-950';
   const textColor = theme === 'light' ? 'text-gray-800' : 'text-gray-100';
   const cardBg = theme === 'light' ? 'bg-white' : 'bg-gray-800';
   const buttonBg = theme === 'light' ? 'bg-amber-100 hover:bg-amber-200' : 'bg-purple-900 hover:bg-purple-800';
@@ -152,7 +150,7 @@ const App: React.FC = () => {
         <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
           {t.title}
         </h1>
-        
+
         <div className="flex gap-2">
           <button
             onClick={toggleTheme}
@@ -194,7 +192,7 @@ const App: React.FC = () => {
             <img
               src={isBlessed ? imageBlessed : imageNotBlessed}
               alt={isBlessed ? 'Blessed' : 'Not Blessed'}
-              className="w-auto h-[750px] object-cover"
+              className="w-auto h-[650px] object-cover"
             />
             
             {/* Işık parıltıları */}
@@ -207,6 +205,17 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Kutsandın mesajı */}
+          {isBlessed && (
+            <div className="absolute bottom-4 w-full flex justify-center">
+              <div className="bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 text-white px-6 py-3 rounded-xl text-2xl font-bold shadow-lg animate-bounce">
+                {t.blessedMessage}
+              </div>
+            </div>
+
+
+          )}
         </div>
 
         {/* Buton */}
@@ -215,7 +224,7 @@ const App: React.FC = () => {
           disabled={isWaiting}
           className={`px-12 py-6 rounded-2xl text-xl font-bold transition-all duration-300 shadow-xl ${
             !isWaiting
-              ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 hover:from-amber-500 hover:via-yellow-500 hover:to-orange-500 hover:scale-105 hover:shadow-2xl text-white cursor-pointer transform active:scale-95'
+              ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 hover:scale-105 hover:shadow-2xl text-white cursor-pointer active:scale-95'
               : 'bg-gray-400 cursor-not-allowed opacity-60 text-gray-200'
           }`}
         >
@@ -241,4 +250,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App
+export default App;
