@@ -34,33 +34,34 @@ const App: React.FC = () => {
     return (saved as Theme) || 'light';
   });
 
-  const [isBlessed, setIsBlessed] = useState(() => {
-    const saved = localStorage.getItem('isBlessed');
-    return saved === 'true';
-  });
-
-  const [timeLeft, setTimeLeft] = useState(() => {
-    const savedEndTime = localStorage.getItem('endTime');
-    if (savedEndTime) {
-      const remaining = Math.floor((parseInt(savedEndTime) - Date.now()) / 1000);
-      return remaining > 0 ? remaining : 0;
-    }
-    return 0;
-  });
-
-  const [isWaiting, setIsWaiting] = useState(() => {
-    const saved = localStorage.getItem('isWaiting');
-    const savedEndTime = localStorage.getItem('endTime');
-    if (savedEndTime) {
-      const remaining = Math.floor((parseInt(savedEndTime) - Date.now()) / 1000);
-      return saved === 'true' && remaining > 0;
-    }
-    return false;
-  });
+  const [isBlessed, setIsBlessed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isWaiting, setIsWaiting] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = translations[language];
   const WAIT_TIME = 600;
+
+
+  useEffect(() => {
+    const savedEndTime = localStorage.getItem('endTime');
+    if (savedEndTime) {
+      const remaining = Math.floor((parseInt(savedEndTime) - Date.now()) / 1000);
+      
+      if (remaining > 0) {
+        setTimeLeft(remaining);
+        setIsWaiting(true);
+        setIsBlessed(true);
+      } else {
+        setTimeLeft(0);
+        setIsWaiting(false);
+        setIsBlessed(false);
+        localStorage.removeItem('endTime');
+        localStorage.removeItem('isWaiting');
+        localStorage.removeItem('isBlessed');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('language', language);
